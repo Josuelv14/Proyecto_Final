@@ -3,6 +3,34 @@ package model;
 import java.util.*;
 
 public class DfsSolver {
+
+    public static class Result implements SolverResult {
+        public final List<Point> path;
+        public final long time;
+        public final int steps;
+
+        public Result(List<Point> path, long time, int steps) {
+            this.path = path;
+            this.time = time;
+            this.steps = steps;
+        }
+
+        @Override
+        public List<Point> getPath() {
+            return path;
+        }
+
+        @Override
+        public long getTime() {
+            return time;
+        }
+
+        @Override
+        public int getSteps() {
+            return steps;
+        }
+    }
+
     public List<Point> solve(Maze maze) {
         Stack<Point> stack = new Stack<>();
         Map<Point, Point> parentMap = new HashMap<>();
@@ -32,6 +60,10 @@ public class DfsSolver {
         return path; // No path found
     }
 
-    public class Result {
+    public SolverResult solve(int[][] maze, Point start, Point end) {
+        Maze mazeInstance = new Maze(maze, start, end);
+        List<Point> path = solve(mazeInstance);
+        return new Result(path, 0, path.size()); // Time is set to 0 for simplicity
     }
 }
+

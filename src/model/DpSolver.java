@@ -1,11 +1,36 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DpSolver {
+
+    public static class Result implements SolverResult {
+        public final List<Point> path;
+        public final long time;
+        public final int steps;
+
+        public Result(List<Point> path, long time, int steps) {
+            this.path = path;
+            this.time = time;
+            this.steps = steps;
+        }
+
+        @Override
+        public List<Point> getPath() {
+            return path;
+        }
+
+        @Override
+        public long getTime() {
+            return time;
+        }
+
+        @Override
+        public int getSteps() {
+            return steps;
+        }
+    }
+
     private final Map<Point, Boolean> cache = new HashMap<>();
 
     public List<Point> solve(Maze maze) {
@@ -40,6 +65,11 @@ public class DpSolver {
         return false;
     }
 
-    public class Result {
+    public SolverResult solve(int[][] maze, Point start, Point end) {
+        Maze mazeInstance = new Maze(maze, start, end);
+        long startTime = System.currentTimeMillis();
+        List<Point> path = solve(mazeInstance);
+        long endTime = System.currentTimeMillis();
+        return new Result(path, endTime - startTime, path.size());
     }
 }

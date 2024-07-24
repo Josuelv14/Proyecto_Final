@@ -3,6 +3,34 @@ package model;
 import java.util.*;
 
 public class BfsSolver {
+
+    public static class Result implements SolverResult {
+        public final List<Point> path;
+        public final long time;
+        public final int steps;
+
+        public Result(List<Point> path, long time, int steps) {
+            this.path = path;
+            this.time = time;
+            this.steps = steps;
+        }
+
+        @Override
+        public List<Point> getPath() {
+            return path;
+        }
+
+        @Override
+        public long getTime() {
+            return time;
+        }
+
+        @Override
+        public int getSteps() {
+            return steps;
+        }
+    }
+
     public Result solve(Maze maze) {
         long startTime = System.currentTimeMillis();
         Queue<Point> queue = new LinkedList<>();
@@ -35,15 +63,8 @@ public class BfsSolver {
         return new Result(path, endTime - startTime, path.size()); // No path found
     }
 
-    public static class Result {
-        public final List<Point> path;
-        public final long time;
-        public final int steps;
-
-        public Result(List<Point> path, long time, int steps) {
-            this.path = path;
-            this.time = time;
-            this.steps = steps;
-        }
+    public SolverResult solve(int[][] maze, Point start, Point end) {
+        Maze mazeInstance = new Maze(maze, start, end);
+        return solve(mazeInstance);
     }
 }

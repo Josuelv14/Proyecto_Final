@@ -1,39 +1,42 @@
 package controller;
 
-import model.*;
-import model.DfsSolver.Result;
-
-import java.util.List;
+import model.Point;
+import model.BfsSolver;
+import model.DfsSolver;
+import model.RecursiveSolver;
+import model.DpSolver;
+import model.SolverResult;
 
 public class MazeController {
-    private Maze maze;
-    private RecursiveSolver recursiveSolver;
-    private DpSolver dpSolver;
-    private BfsSolver bfsSolver;
-    private DfsSolver dfsSolver;
+    private int[][] maze;
+    private Point start;
+    private Point end;
 
-    public MazeController(int[][] mazeMatrix, Point start, Point end) {
-        this.maze = new Maze(mazeMatrix, start, end);
-        this.recursiveSolver = new RecursiveSolver();
-        this.dpSolver = new DpSolver();
-        this.bfsSolver = new BfsSolver();
-        this.dfsSolver = new DfsSolver();
+    public MazeController(int[][] maze, Point start, Point end) {
+        this.maze = maze;
+        this.start = start;
+        this.end = end;
     }
 
-    public BfsSolver.Result solveWithBfs() {
-        return bfsSolver.solve(maze);
+    public SolverResult solveWithBfs() {
+        BfsSolver bfsSolver = new BfsSolver();
+        return bfsSolver.solve(maze, start, end);
     }
 
-    public DfsSolver.Result solveWithDfs() {
-        return (Result) dfsSolver.solve(maze);
+    public SolverResult solveWithDfs() {
+        DfsSolver dfsSolver = new DfsSolver();
+        return dfsSolver.solve(maze, start, end);
     }
 
-    public RecursiveSolver.Result solveWithRecursive() {
-        return (model.RecursiveSolver.Result) recursiveSolver.solve(maze);
+    public SolverResult solveWithRecursive() {
+        RecursiveSolver recursiveSolver = new RecursiveSolver();
+        return recursiveSolver.solve(maze, start, end);
     }
 
-    public DpSolver.Result solveWithDp() {
-        return (model.DpSolver.Result) dpSolver.solve(maze);
+    public SolverResult solveWithDp() {
+        DpSolver dpSolver = new DpSolver();
+        return dpSolver.solve(maze, start, end);
     }
 }
+
 

@@ -2,12 +2,14 @@ package view;
 
 import controller.MazeController;
 import model.Point;
+import model.SolverResult;
 
-import javax.naming.spi.DirStateFactory.Result;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +56,17 @@ public class MazeView extends JFrame {
             }
         };
         mazePanel.setPreferredSize(new Dimension(mazeMatrix[0].length * CELL_SIZE, mazeMatrix.length * CELL_SIZE));
+        mazePanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int col = e.getX() / CELL_SIZE;
+                int row = e.getY() / CELL_SIZE;
+                if (row >= 0 && row < mazeMatrix.length && col >= 0 && col < mazeMatrix[0].length) {
+                    mazeMatrix[row][col] = mazeMatrix[row][col] == 1 ? 0 : 1;
+                    mazePanel.repaint();
+                }
+            }
+        });
 
         // Panel de controles
         JPanel controlPanel = new JPanel();
@@ -79,9 +92,9 @@ public class MazeView extends JFrame {
         controlPanel.add(rowsField);
         controlPanel.add(new JLabel("Cols:"));
         controlPanel.add(colsField);
-        controlPanel.add(new JLabel("Start X:"));
-        controlPanel.add(startXField);
         controlPanel.add(new JLabel("Start Y:"));
+        controlPanel.add(startXField);
+        controlPanel.add(new JLabel("Start X:"));
         controlPanel.add(startYField);
         controlPanel.add(new JLabel("End X:"));
         controlPanel.add(endXField);
@@ -130,26 +143,26 @@ public class MazeView extends JFrame {
             String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
             if (selectedAlgorithm == null) return;
 
-            model.BfsSolver.Result result = null;
+            SolverResult result = null;
             switch (selectedAlgorithm) {
                 case "BFS":
                     result = controller.solveWithBfs();
                     break;
                 case "DFS":
-                    result = controller.solveWithBfs();
+                    result = controller.solveWithDfs();
                     break;
                 case "Recursive":
-                    result = controller.solveWithBfs();
+                    result = controller.solveWithRecursive();
                     break;
                 case "DP":
-                    result = controller.solveWithBfs();
+                    result = controller.solveWithDp();
                     break;
             }
 
             if (result != null) {
-                path = result.path;
+                path = result.getPath();
                 showPathStepByStep();
-                resultLabel.setText(String.format("Time: %d ms, Steps: %d", result.time, result.steps));
+                resultLabel.setText(String.format("Time: %d ms, Steps: %d", result.getTime(), result.getSteps()));
             } else {
                 resultLabel.setText("No path found.");
             }
@@ -208,22 +221,27 @@ public class MazeView extends JFrame {
                 mazePanel.revalidate();
                 mazePanel.repaint();
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(MazeView.this, "Invalid input! Please enter valid numbers.");
+                resultLabel.setText("Invalid input.");
             }
         }
     }
 
     public static void main(String[] args) {
-        int[][] mazeMatrix = {
-                {0, 1, 0, 0, 0},
-                {0, 1, 0, 1, 0},
-                {0, 0, 0, 1, 0},
-                {1, 1, 0, 0, 0},
-                {0, 0, 0, 1, 0}
-        };
-        Point start = new Point(0, 0);
-        Point end = new Point(4, 4);
-        MazeView mazeView = new MazeView(mazeMatrix, start, end);
-        mazeView.setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int[][] mazeMatrix = {
+                    {0, 1, 0, 0, 0},
+                    {0, 1, 0, 1, 0},
+                    {0, 0, 0, 1, 0},
+                    {0, 1, 0, 0, 0},
+                    {0, 0, 0, 1, 0}
+                };
+                Point start = new Point(0, 0);
+                Point end = new Point(4, 4);
+                new MazeView(mazeMatrix, start, end).setVisible(true);
+            }
+        });
     }
 }
+
