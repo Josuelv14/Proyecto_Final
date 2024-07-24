@@ -3,14 +3,10 @@ package Vista;
 import Modelo.Maze;
 import Modelo.Algorithms;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 public class MazeView extends JFrame {
     private Maze maze;
@@ -18,7 +14,6 @@ public class MazeView extends JFrame {
     private JButton bfsButton;
     private JButton dfsButton;
     private JButton dpButton;
-    private BufferedImage dragonBallImage;
 
     public MazeView(Maze maze) {
         this.maze = maze;
@@ -26,15 +21,6 @@ public class MazeView extends JFrame {
         setSize(600, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-
-        try {
-            dragonBallImage = ImageIO.read(new File(System.getProperty("user.home") + "/Desktop/esferas.jpeg"));
-            if (dragonBallImage == null) {
-                System.out.println("Error: La imagen no se pudo cargar.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         mazePanel = new JPanel() {
             @Override
@@ -86,20 +72,14 @@ public class MazeView extends JFrame {
             for (int j = 0; j < mazeArray[0].length; j++) {
                 if (mazeArray[i][j] == 1) {
                     g.setColor(Color.BLACK);
-                    g.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                 } else {
                     if (maze.isVisited(i, j)) {
-                        if (dragonBallImage != null) {
-                            g.drawImage(dragonBallImage, j * cellSize, i * cellSize, cellSize, cellSize, null);
-                        } else {
-                            g.setColor(Color.RED); // Color de respaldo en caso de que la imagen no se cargue
-                            g.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
-                        }
+                        g.setColor(Color.GREEN);
                     } else {
                         g.setColor(Color.WHITE);
-                        g.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                     }
                 }
+                g.fillRect(j * cellSize, i * cellSize, cellSize, cellSize);
                 g.setColor(Color.GRAY);
                 g.drawRect(j * cellSize, i * cellSize, cellSize, cellSize);
             }
