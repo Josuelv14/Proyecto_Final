@@ -30,4 +30,7 @@ public class RecursiveSolver {
         path.remove(path.size() - 1);
         return false;
     }
+
+    public class Result {
+    }
 }

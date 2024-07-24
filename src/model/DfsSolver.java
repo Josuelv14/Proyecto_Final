@@ -31,4 +31,7 @@ public class DfsSolver {
         }
         return path; // No path found
     }
+
+    public class Result {
+    }
 }

@@ -39,4 +39,7 @@ public class DpSolver {
         cache.put(current, false);
         return false;
     }
+
+    public class Result {
+    }
 }

@@ -1,6 +1,7 @@
 package controller;
 
 import model.*;
+import model.DfsSolver.Result;
 
 import java.util.List;
 
@@ -19,19 +20,20 @@ public class MazeController {
         this.dfsSolver = new DfsSolver();
     }
 
-    public List<Point> solveWithRecursive() {
-        return recursiveSolver.solve(maze);
-    }
-
-    public List<Point> solveWithDp() {
-        return dpSolver.solve(maze);
-    }
-
-    public List<Point> solveWithBfs() {
+    public BfsSolver.Result solveWithBfs() {
         return bfsSolver.solve(maze);
     }
 
-    public List<Point> solveWithDfs() {
-        return dfsSolver.solve(maze);
+    public DfsSolver.Result solveWithDfs() {
+        return (Result) dfsSolver.solve(maze);
+    }
+
+    public RecursiveSolver.Result solveWithRecursive() {
+        return (model.RecursiveSolver.Result) recursiveSolver.solve(maze);
+    }
+
+    public DpSolver.Result solveWithDp() {
+        return (model.DpSolver.Result) dpSolver.solve(maze);
     }
 }
+

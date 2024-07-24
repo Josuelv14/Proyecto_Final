@@ -3,7 +3,8 @@ package model;
 import java.util.*;
 
 public class BfsSolver {
-    public List<Point> solve(Maze maze) {
+    public Result solve(Maze maze) {
+        long startTime = System.currentTimeMillis();
         Queue<Point> queue = new LinkedList<>();
         Map<Point, Point> parentMap = new HashMap<>();
         List<Point> path = new ArrayList<>();
@@ -19,7 +20,8 @@ public class BfsSolver {
                     path.add(0, current);
                     current = parentMap.get(current);
                 }
-                return path;
+                long endTime = System.currentTimeMillis();
+                return new Result(path, endTime - startTime, path.size());
             }
             for (Point d : directions) {
                 Point next = new Point(current.x + d.x, current.y + d.y);
@@ -29,6 +31,19 @@ public class BfsSolver {
                 }
             }
         }
-        return path; // No path found
+        long endTime = System.currentTimeMillis();
+        return new Result(path, endTime - startTime, path.size()); // No path found
+    }
+
+    public static class Result {
+        public final List<Point> path;
+        public final long time;
+        public final int steps;
+
+        public Result(List<Point> path, long time, int steps) {
+            this.path = path;
+            this.time = time;
+            this.steps = steps;
+        }
     }
 }
