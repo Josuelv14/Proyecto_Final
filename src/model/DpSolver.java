@@ -1,44 +1,32 @@
 package model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DpSolver {
 
-    public static class Result implements SolverResult {
-        public final List<Point> path;
-        public final long time;
-        public final int steps;
+    private Map<Point, Boolean> cache = new HashMap<>();
+    private List<List<Point>> allPaths = new ArrayList<>();
 
-        public Result(List<Point> path, long time, int steps) {
-            this.path = path;
-            this.time = time;
-            this.steps = steps;
-        }
+    public SolveResult solve(Maze maze) {
+        List<Point> path = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
 
-        @Override
-        public List<Point> getPath() {
-            return path;
+        if (findPath(maze, maze.getStart(), path)) {
+            long endTime = System.currentTimeMillis();
+            return new SolveResult(path, endTime - startTime, path.size());
         }
-
-        @Override
-        public long getTime() {
-            return time;
-        }
-
-        @Override
-        public int getSteps() {
-            return steps;
-        }
+        long endTime = System.currentTimeMillis();
+        return new SolveResult(new ArrayList<>(), endTime - startTime, 0); // No path found
     }
 
-    private final Map<Point, Boolean> cache = new HashMap<>();
-
-    public List<Point> solve(Maze maze) {
+    public List<List<Point>> getAllPaths(Maze maze) {
+        allPaths.clear();
         List<Point> path = new ArrayList<>();
-        if (findPath(maze, maze.getStart(), path)) {
-            return path;
-        }
-        return new ArrayList<>(); // No path found
+        findAllPaths(maze, maze.getStart(), path);
+        return allPaths;
     }
 
     private boolean findPath(Maze maze, Point current, List<Point> path) {
@@ -65,11 +53,21 @@ public class DpSolver {
         return false;
     }
 
-    public SolverResult solve(int[][] maze, Point start, Point end) {
-        Maze mazeInstance = new Maze(maze, start, end);
-        long startTime = System.currentTimeMillis();
-        List<Point> path = solve(mazeInstance);
-        long endTime = System.currentTimeMillis();
-        return new Result(path, endTime - startTime, path.size());
+    private void findAllPaths(Maze maze, Point current, List<Point> path) {
+        if (!maze.isTransitable(current) || path.contains(current)) {
+            return;
+        }
+        path.add(current);
+        if (current.equals(maze.getEnd())) {
+            allPaths.add(new ArrayList<>(path));
+            path.remove(path.size() - 1);
+            return;
+        }
+        Point[] directions = { new Point(0, 1), new Point(1, 0), new Point(0, -1), new Point(-1, 0) };
+        for (Point d : directions) {
+            Point next = new Point(current.x + d.x, current.y + d.y);
+            findAllPaths(maze, next, path);
+        }
+        path.remove(path.size() - 1);
     }
 }

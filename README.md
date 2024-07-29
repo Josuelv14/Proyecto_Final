@@ -44,18 +44,26 @@ movimiento (puede moverse sólo hacia arriba, abajo, izquierda o derecha) y las 
 - **Interfaz de Usuario:** Diseñamos una interfaz simple que permite la entrada del laberinto y visualiza la ruta óptima.
 
 ### Capturas
--  **Aqui van las capturas del código**
+- Interfaz
+![](interfaz.png)
+![](iNTERFAZ2.png)
 
+- BFS
+![](BFS.png)
+- DFS
+![](DFS.png)
+- Recursivo
+![](Recursivo.png)
 ## Conclusión
 
 - _En la implementación de los diferentes métodos, se observaron
   los siguientes resultados:_
 
-  - **Método Recursivo:** Eficiente pero puede ser menos óptimo para laberintos grandes debido a su complejidad.
+  - **Método Recursivo:** Es eficiente, pero puede no ser óptimo para laberintos grandes debido a su complejidad y uso de memoria.
 
-  - **Programación Dinámica:** Reduce la redundancia y mejora la eficiencia al almacenar resultados intermedios.
-  - **BFS:** Adecuado para encontrar la ruta más corta en grafos no ponderados.
-  - **DFS:** Puede ser más rápido en algunos casos pero no garantiza la ruta más corta.
+  - **Programación Dinámica:** Mejora la eficiencia al evitar redundancias, almacenando resultados intermedios.
+  - **BFS:** Se puede considerar que este es el método mas eficiente (Búsqueda de choque) comparado con los demás siendo asi que este sirve para encontrar el camino mas corto y más rápido ya que encuentra el camino mas corto entre dos nodos.
+  - **DFS:** Puede ser más rápido en algunos casos pero no garantiza la ruta más corta tambien requiere un espacio de memoria proporcional a la profundidad del grafo en el peor de los casos, lo cual puede ser un limitante en grafos muy profundos.
 
 - **Conclusión final:** Entre los métodos evaluados, BFS demostró ser la opción más eficiente para encontrar el camino más corto en el contexto del problema planteado.
 
@@ -63,10 +71,10 @@ movimiento (puede moverse sólo hacia arriba, abajo, izquierda o derecha) y las 
 
 ## Consideraciones
 
-- _Milton Chuqui:_
+- _Milton Chuqui:_ Falto mejorar la resolucion del laberinto haceiendo que los métodos BFS y DFS pinten todos los caminos posibles haya o no haya caminos para llegar al destino. 
 
-- _John Serrano:_
+- _John Serrano:_Falto mejorar la interfaz, me hubiera gustado poder poner imaganes en el camino correcto, para que sea mas dinamico y vistoso para el usuario. 
 
-- _Josue Valdez:_
+- _Josue Valdez:_ Falto implementar una mejora en parte de organizar el codigo se crearon muchas clases e instancias que hacian que no ejecute bien el codigo y daba errores casi todo el tiempo.
 
 #

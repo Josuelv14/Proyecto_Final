@@ -2,7 +2,7 @@ package view;
 
 import controller.MazeController;
 import model.Point;
-import model.SolverResult;
+import model.SolveResult;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +18,7 @@ public class MazeView extends JFrame {
     private MazeController controller;
     private int[][] mazeMatrix;
     private List<Point> path;
+    private List<List<Point>> allPaths;
     private JComboBox<String> algorithmComboBox;
     private JButton solveButton;
     private JButton clearButton;
@@ -38,21 +39,21 @@ public class MazeView extends JFrame {
         this.mazeMatrix = mazeMatrix;
         this.path = new ArrayList<>();
         this.currentPath = new ArrayList<>();
+        this.allPaths = new ArrayList<>();
         setTitle("Maze Solver");
-        setSize(mazeMatrix[0].length * CELL_SIZE + 400, mazeMatrix.length * CELL_SIZE + 200);
+        setSize(mazeMatrix[0].length * CELL_SIZE + 300, mazeMatrix.length * CELL_SIZE + 250);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initComponents();
     }
 
     private void initComponents() {
-        // Panel para el laberinto
         mazePanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 drawMaze(g);
-                drawPath(g);
+                drawAllPaths(g);
             }
         };
         mazePanel.setPreferredSize(new Dimension(mazeMatrix[0].length * CELL_SIZE, mazeMatrix.length * CELL_SIZE));
@@ -62,19 +63,23 @@ public class MazeView extends JFrame {
                 int col = e.getX() / CELL_SIZE;
                 int row = e.getY() / CELL_SIZE;
                 if (row >= 0 && row < mazeMatrix.length && col >= 0 && col < mazeMatrix[0].length) {
-                    mazeMatrix[row][col] = mazeMatrix[row][col] == 1 ? 0 : 1;
+                    mazeMatrix[row][col] = (mazeMatrix[row][col] == 0) ? 1 : 0;
                     mazePanel.repaint();
                 }
             }
         });
 
-        // Panel de controles
         JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new BorderLayout(10, 10));
+        controlPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Panel para los campos de texto, etiquetas y botones
-        JPanel fieldsAndButtonsPanel = new JPanel();
-        fieldsAndButtonsPanel.setLayout(new GridLayout(13, 1, 10, 10)); // 13 filas, 1 columna, 10px de espacio entre componentes
+        algorithmComboBox = new JComboBox<>(new String[]{"BFS", "DFS", "Recursive", "DP"});
+        solveButton = new JButton("Solve");
+        solveButton.addActionListener(new SolveButtonListener());
+        clearButton = new JButton("Clear");
+        clearButton.addActionListener(new ClearButtonListener());
 
         rowsField = new JTextField("5", 5);
         colsField = new JTextField("5", 5);
@@ -82,44 +87,83 @@ public class MazeView extends JFrame {
         startYField = new JTextField("0", 5);
         endXField = new JTextField("4", 5);
         endYField = new JTextField("4", 5);
-
-        fieldsAndButtonsPanel.add(new JLabel("Rows:"));
-        fieldsAndButtonsPanel.add(rowsField);
-        fieldsAndButtonsPanel.add(new JLabel("Cols:"));
-        fieldsAndButtonsPanel.add(colsField);
-        fieldsAndButtonsPanel.add(new JLabel("Start X:"));
-        fieldsAndButtonsPanel.add(startXField);
-        fieldsAndButtonsPanel.add(new JLabel("Start Y:"));
-        fieldsAndButtonsPanel.add(startYField);
-        fieldsAndButtonsPanel.add(new JLabel("End X:"));
-        fieldsAndButtonsPanel.add(endXField);
-        fieldsAndButtonsPanel.add(new JLabel("End Y:"));
-        fieldsAndButtonsPanel.add(endYField);
-
         updateMazeButton = new JButton("Update Maze");
         updateMazeButton.addActionListener(new UpdateMazeButtonListener());
-        fieldsAndButtonsPanel.add(updateMazeButton);
-
-        algorithmComboBox = new JComboBox<>(new String[]{"BFS", "DFS", "Recursive", "DP"});
-        fieldsAndButtonsPanel.add(new JLabel("Select Algorithm:"));
-        fieldsAndButtonsPanel.add(algorithmComboBox);
-
-        solveButton = new JButton("Solve");
-        solveButton.addActionListener(new SolveButtonListener());
-        fieldsAndButtonsPanel.add(solveButton);
-
-        clearButton = new JButton("Clear");
-        clearButton.addActionListener(new ClearButtonListener());
-        fieldsAndButtonsPanel.add(clearButton);
 
         resultLabel = new JLabel("Results will be shown here");
-        fieldsAndButtonsPanel.add(resultLabel);
 
-        controlPanel.add(fieldsAndButtonsPanel, BorderLayout.EAST);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        controlPanel.add(new JLabel("Rows:"), gbc);
 
-        // Añadir paneles al frame
-        setLayout(new BorderLayout());
-        add(mazePanel, BorderLayout.CENTER);
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        gbc.gridwidth = 1;
+        controlPanel.add(rowsField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        controlPanel.add(new JLabel("Cols:"), gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        controlPanel.add(colsField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        controlPanel.add(new JLabel("Start X:"), gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        controlPanel.add(startXField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        controlPanel.add(new JLabel("Start Y:"), gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 3;
+        controlPanel.add(startYField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        controlPanel.add(new JLabel("End X:"), gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 4;
+        controlPanel.add(endXField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        controlPanel.add(new JLabel("End Y:"), gbc);
+
+        gbc.gridx = 2;
+        gbc.gridy = 5;
+        controlPanel.add(endYField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 3;
+        controlPanel.add(updateMazeButton, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        controlPanel.add(algorithmComboBox, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 8;
+        controlPanel.add(solveButton, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 9;
+        controlPanel.add(clearButton, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 10;
+        controlPanel.add(resultLabel, gbc);
+
+        add(new JScrollPane(mazePanel), BorderLayout.CENTER);
         add(controlPanel, BorderLayout.EAST);
     }
 
@@ -137,48 +181,6 @@ public class MazeView extends JFrame {
             }
         }
     }
-
-    private void drawPath(Graphics g) {
-        g.setColor(Color.RED);
-        for (Point p : currentPath) {
-            g.fillRect(p.y * CELL_SIZE, p.x * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-        }
-    }
-
-    private class SolveButtonListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            path.clear();
-            currentPath.clear();
-            String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
-            if (selectedAlgorithm == null) return;
-
-            SolverResult result = null;
-            switch (selectedAlgorithm) {
-                case "BFS":
-                    result = controller.solveWithBfs();
-                    break;
-                case "DFS":
-                    result = controller.solveWithDfs();
-                    break;
-                case "Recursive":
-                    result = controller.solveWithRecursive();
-                    break;
-                case "DP":
-                    result = controller.solveWithDp();
-                    break;
-            }
-
-            if (result != null) {
-                path = result.getPath();
-                showPathStepByStep();
-                resultLabel.setText(String.format("Time: %.2f seconds, Steps: %d", result.getTime() / 1000.0, result.getSteps()));
-            } else {
-                resultLabel.setText("No path found.");
-            }
-        }
-    }
-
     private void showPathStepByStep() {
         if (timer != null && timer.isRunning()) {
             timer.stop();
@@ -187,7 +189,7 @@ public class MazeView extends JFrame {
         int delay = 100; // milliseconds
         timer = new Timer(delay, new ActionListener() {
             private int index = 0;
-
+    
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (index < path.size()) {
@@ -202,14 +204,75 @@ public class MazeView extends JFrame {
         timer.start();
     }
 
+    private void drawAllPaths(Graphics g) {
+        g.setColor(Color.GREEN);
+        for (List<Point> path : allPaths) {
+            for (Point p : path) {
+                g.fillRect(p.y * CELL_SIZE, p.x * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+        }
+        g.setColor(Color.RED);
+        for (Point p : currentPath) {
+            g.fillRect(p.y * CELL_SIZE, p.x * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+    }
+
+    private void drawPath(Graphics g) {
+        // Pintar el camino principal en rojo
+        g.setColor(Color.RED);
+        for (Point p : path) {
+            g.fillRect(p.y * CELL_SIZE, p.x * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+    
+        // Pintar los otros caminos en verde
+        g.setColor(Color.GREEN);
+        for (List<Point> otherPath : allPaths) {
+            if (!otherPath.equals(path)) {
+                for (Point p : otherPath) {
+                    g.fillRect(p.y * CELL_SIZE, p.x * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            }
+        }
+    }
+
+    private class SolveButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String algorithm = (String) algorithmComboBox.getSelectedItem();
+            SolveResult result = null;
+    
+            switch (algorithm) {
+                case "BFS":
+                    result = controller.solveWithBfs();
+                    break;
+                case "DFS":
+                    result = controller.solveWithDfs();
+                    break;
+                case "Recursive":
+                    result = controller.solveWithRecursive();
+                    break;
+                case "DP":
+                    result = controller.solveWithDp();
+                    break;
+            }
+    
+            if (result != null) {
+                path = result.getPath();
+                currentPath = path;
+                resultLabel.setText(String.format("Time: %d ms, Steps: %d", result.getTime(), result.getSteps()));
+                mazePanel.repaint();
+            } else {
+                resultLabel.setText("No path found.");
+            }
+        }
+    }
+
     private class ClearButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (timer != null && timer.isRunning()) {
-                timer.stop();
-            }
-            currentPath.clear();
             path.clear();
+            allPaths.clear();
+            resultLabel.setText("Results will be shown here");
             mazePanel.repaint();
         }
     }
@@ -217,40 +280,27 @@ public class MazeView extends JFrame {
     private class UpdateMazeButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            try {
-                int rows = Integer.parseInt(rowsField.getText());
-                int cols = Integer.parseInt(colsField.getText());
-                int startX = Integer.parseInt(startXField.getText());
-                int startY = Integer.parseInt(startYField.getText());
-                int endX = Integer.parseInt(endXField.getText());
-                int endY = Integer.parseInt(endYField.getText());
-
-                mazeMatrix = new int[rows][cols];
-                controller = new MazeController(mazeMatrix, new Point(startX, startY), new Point(endX, endY));
-                mazePanel.setPreferredSize(new Dimension(cols * CELL_SIZE, rows * CELL_SIZE));
-                mazePanel.revalidate();
-                mazePanel.repaint();
-            } catch (NumberFormatException ex) {
-                resultLabel.setText("Invalid input.");
-            }
+            int rows = Integer.parseInt(rowsField.getText());
+            int cols = Integer.parseInt(colsField.getText());
+            mazeMatrix = new int[rows][cols];
+            int startX = Integer.parseInt(startXField.getText());
+            int startY = Integer.parseInt(startYField.getText());
+            int endX = Integer.parseInt(endXField.getText());
+            int endY = Integer.parseInt(endYField.getText());
+            controller.updateMaze(mazeMatrix, new Point(startX, startY), new Point(endX, endY));
+            setSize(mazeMatrix[0].length * CELL_SIZE + 300, mazeMatrix.length * CELL_SIZE + 250);
+            mazePanel.setPreferredSize(new Dimension(mazeMatrix[0].length * CELL_SIZE, mazeMatrix.length * CELL_SIZE));
+            mazePanel.repaint();
         }
     }
-
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                int[][] mazeMatrix = {
-                    {0, 1, 0, 0, 0},
-                    {0, 1, 0, 1, 0},
-                    {0, 0, 0, 1, 0},
-                    {0, 1, 0, 0, 0},
-                    {0, 0, 0, 1, 0}
-                };
-                Point start = new Point(0, 0);
-                Point end = new Point(4, 4);
-                new MazeView(mazeMatrix, start, end).setVisible(true);
-            }
-        });
+        // Inicializar un laberinto de ejemplo 10x10
+        int[][] mazeMatrix = new int[10][10];
+        Point start = new Point(0, 0);
+        Point end = new Point(9, 9);
+
+        // Crear y mostrar la interfaz gráfica del laberinto
+        MazeView view = new MazeView(mazeMatrix, start, end);
+        view.setVisible(true);
     }
 }

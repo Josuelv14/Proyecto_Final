@@ -3,45 +3,10 @@ package model;
 import java.util.*;
 
 public class BfsSolver {
-
-    public static class Result implements SolverResult {
-        public final List<List<Point>> allPaths;
-        public final List<Point> shortestPath;
-        public final long time;
-        public final int steps;
-
-        public Result(List<List<Point>> allPaths, List<Point> shortestPath, long time, int steps) {
-            this.allPaths = allPaths;
-            this.shortestPath = shortestPath;
-            this.time = time;
-            this.steps = steps;
-        }
-
-        @Override
-        public List<Point> getPath() {
-            return shortestPath;
-        }
-
-        @Override
-        public long getTime() {
-            return time;
-        }
-
-        @Override
-        public int getSteps() {
-            return steps;
-        }
-
-        public List<List<Point>> getAllPaths() {
-            return allPaths;
-        }
-    }
-
-    public Result solve(Maze maze) {
+    public SolveResult solve(Maze maze) {
         long startTime = System.currentTimeMillis();
         Queue<Point> queue = new LinkedList<>();
         Map<Point, Point> parentMap = new HashMap<>();
-        List<List<Point>> allPaths = new ArrayList<>();
         List<Point> path = new ArrayList<>();
         queue.add(maze.getStart());
         parentMap.put(maze.getStart(), null);
@@ -51,13 +16,12 @@ public class BfsSolver {
         while (!queue.isEmpty()) {
             Point current = queue.poll();
             if (current.equals(maze.getEnd())) {
-                List<Point> fullPath = new ArrayList<>();
                 while (current != null) {
-                    fullPath.add(0, current);
+                    path.add(0, current);
                     current = parentMap.get(current);
                 }
-                allPaths.add(fullPath);
-                path = fullPath;  
+                long endTime = System.currentTimeMillis();
+                return new SolveResult(path, endTime - startTime, path.size());
             }
             for (Point d : directions) {
                 Point next = new Point(current.x + d.x, current.y + d.y);
@@ -68,11 +32,13 @@ public class BfsSolver {
             }
         }
         long endTime = System.currentTimeMillis();
-        return new Result(allPaths, path, endTime - startTime, path.size()); 
+        return new SolveResult(new ArrayList<>(), endTime - startTime, 0); // No path found
     }
 
-    public SolverResult solve(int[][] maze, Point start, Point end) {
-        Maze mazeInstance = new Maze(maze, start, end);
-        return solve(mazeInstance);
+    public List<List<Point>> getAllPaths(Maze maze) {
+        List<List<Point>> allPaths = new ArrayList<>();
+        // Implementa aquí el código para encontrar todos los caminos usando BFS
+        return allPaths;
     }
+
 }

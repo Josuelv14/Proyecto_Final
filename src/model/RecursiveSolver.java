@@ -1,45 +1,22 @@
 package model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RecursiveSolver {
-
-    public static class Result implements SolverResult {
-        public final List<Point> path;
-        public final long time;
-        public final int steps;
-
-        public Result(List<Point> path, long time, int steps) {
-            this.path = path;
-            this.time = time;
-            this.steps = steps;
-        }
-
-        @Override
-        public List<Point> getPath() {
-            return path;
-        }
-
-        @Override
-        public long getTime() {
-            return time;
-        }
-
-        @Override
-        public int getSteps() {
-            return steps;
-        }
-    }
-
-    public List<Point> solve(Maze maze) {
+    public SolveResult solve(Maze maze) {
+        long startTime = System.currentTimeMillis();
         List<Point> path = new ArrayList<>();
-        if (findPath(maze, maze.getStart(), path)) {
-            return path;
+        boolean found = solveMaze(maze, maze.getStart(), path);
+        long endTime = System.currentTimeMillis();
+        if (found) {
+            return new SolveResult(path, endTime - startTime, path.size());
+        } else {
+            return new SolveResult(new ArrayList<>(), endTime - startTime, 0);
         }
-        return new ArrayList<>(); // No path found
     }
 
-    private boolean findPath(Maze maze, Point current, List<Point> path) {
+    private boolean solveMaze(Maze maze, Point current, List<Point> path) {
         if (!maze.isTransitable(current) || path.contains(current)) {
             return false;
         }
@@ -50,7 +27,7 @@ public class RecursiveSolver {
         Point[] directions = { new Point(0, 1), new Point(1, 0), new Point(0, -1), new Point(-1, 0) };
         for (Point d : directions) {
             Point next = new Point(current.x + d.x, current.y + d.y);
-            if (findPath(maze, next, path)) {
+            if (solveMaze(maze, next, path)) {
                 return true;
             }
         }
@@ -58,12 +35,26 @@ public class RecursiveSolver {
         return false;
     }
 
-    public SolverResult solve(int[][] maze, Point start, Point end) {
-        Maze mazeInstance = new Maze(maze, start, end);
-        long startTime = System.currentTimeMillis();
-        List<Point> path = solve(mazeInstance);
-        long endTime = System.currentTimeMillis();
-        return new Result(path, endTime - startTime, path.size());
+    public List<List<Point>> getAllPaths(Maze maze) {
+        List<List<Point>> allPaths = new ArrayList<>();
+        findAllPaths(maze, maze.getStart(), new ArrayList<>(), allPaths);
+        return allPaths;
+    }
+
+    private void findAllPaths(Maze maze, Point current, List<Point> path, List<List<Point>> allPaths) {
+        if (!maze.isTransitable(current) || path.contains(current)) {
+            return;
+        }
+        path.add(current);
+        if (current.equals(maze.getEnd())) {
+            allPaths.add(new ArrayList<>(path));
+        } else {
+            Point[] directions = { new Point(0, 1), new Point(1, 0), new Point(0, -1), new Point(-1, 0) };
+            for (Point d : directions) {
+                Point next = new Point(current.x + d.x, current.y + d.y);
+                findAllPaths(maze, next, path, allPaths);
+            }
+        }
+        path.remove(path.size() - 1);
     }
 }
-

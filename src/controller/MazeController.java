@@ -1,41 +1,57 @@
 package controller;
 
-import model.Point;
-import model.BfsSolver;
-import model.DfsSolver;
-import model.RecursiveSolver;
-import model.DpSolver;
-import model.SolverResult;
+import model.*;
+
+import java.util.List;
 
 public class MazeController {
-    private int[][] maze;
-    private Point start;
-    private Point end;
+    private Maze maze;
+    private RecursiveSolver recursiveSolver;
+    private DpSolver dpSolver;
+    private BfsSolver bfsSolver;
+    private DfsSolver dfsSolver;
 
-    public MazeController(int[][] maze, Point start, Point end) {
-        this.maze = maze;
-        this.start = start;
-        this.end = end;
+    public MazeController(int[][] mazeMatrix, Point start, Point end) {
+        this.maze = new Maze(mazeMatrix, start, end);
+        this.recursiveSolver = new RecursiveSolver();
+        this.dpSolver = new DpSolver();
+        this.bfsSolver = new BfsSolver();
+        this.dfsSolver = new DfsSolver();
     }
 
-    public SolverResult solveWithBfs() {
-        BfsSolver bfsSolver = new BfsSolver();
-        return bfsSolver.solve(maze, start, end);
+    public SolveResult solveWithRecursive() {
+        return recursiveSolver.solve(maze);
     }
 
-    public SolverResult solveWithDfs() {
-        DfsSolver dfsSolver = new DfsSolver();
-        return dfsSolver.solve(maze, start, end);
+    public SolveResult solveWithDp() {
+        return dpSolver.solve(maze);
     }
 
-    public SolverResult solveWithRecursive() {
-        RecursiveSolver recursiveSolver = new RecursiveSolver();
-        return recursiveSolver.solve(maze, start, end);
+    public SolveResult solveWithBfs() {
+        return bfsSolver.solve(maze);
     }
 
-    public SolverResult solveWithDp() {
-        DpSolver dpSolver = new DpSolver();
-        return dpSolver.solve(maze, start, end);
+    public SolveResult solveWithDfs() {
+        List<Point> path = dfsSolver.solve(maze);
+        return new SolveResult(path, 0, path.size()); // Considera ajustar el tiempo y pasos según sea necesario
+    }
+    public List<List<Point>> getAllPathsWithDfs() {
+        return dfsSolver.getAllPaths(maze);
+    }
+    
+    public List<List<Point>> getAllPathsWithBfs() {
+        return bfsSolver.getAllPaths(maze);
+    }
+    public List<List<Point>> getAllPathsWithRecursive() {
+        return recursiveSolver.getAllPaths(maze);
+    }
+
+    public List<List<Point>> getAllPathsWithDp() {
+        return dpSolver.getAllPaths(maze);
+    }
+
+    public void updateMaze(int[][] mazeMatrix, Point start, Point end) {
+        this.maze = new Maze(mazeMatrix, start, end);
     }
 }
 
