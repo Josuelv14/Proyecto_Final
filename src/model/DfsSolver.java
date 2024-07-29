@@ -5,19 +5,21 @@ import java.util.*;
 public class DfsSolver {
 
     public static class Result implements SolverResult {
-        public final List<Point> path;
+        public final List<List<Point>> allPaths;
+        public final List<Point> shortestPath;
         public final long time;
         public final int steps;
 
-        public Result(List<Point> path, long time, int steps) {
-            this.path = path;
+        public Result(List<List<Point>> allPaths, List<Point> shortestPath, long time, int steps) {
+            this.allPaths = allPaths;
+            this.shortestPath = shortestPath;
             this.time = time;
             this.steps = steps;
         }
 
         @Override
         public List<Point> getPath() {
-            return path;
+            return shortestPath;
         }
 
         @Override
@@ -29,11 +31,17 @@ public class DfsSolver {
         public int getSteps() {
             return steps;
         }
+
+        public List<List<Point>> getAllPaths() {
+            return allPaths;
+        }
     }
 
-    public List<Point> solve(Maze maze) {
+    public Result solve(Maze maze) {
+        long startTime = System.currentTimeMillis();
         Stack<Point> stack = new Stack<>();
         Map<Point, Point> parentMap = new HashMap<>();
+        List<List<Point>> allPaths = new ArrayList<>();
         List<Point> path = new ArrayList<>();
         stack.push(maze.getStart());
         parentMap.put(maze.getStart(), null);
@@ -43,11 +51,15 @@ public class DfsSolver {
         while (!stack.isEmpty()) {
             Point current = stack.pop();
             if (current.equals(maze.getEnd())) {
+                List<Point> fullPath = new ArrayList<>();
                 while (current != null) {
-                    path.add(0, current);
+                    fullPath.add(0, current);
                     current = parentMap.get(current);
                 }
-                return path;
+                allPaths.add(fullPath);
+                if (path.isEmpty() || fullPath.size() < path.size()) {
+                    path = fullPath;  // Update shortest path
+                }
             }
             for (Point d : directions) {
                 Point next = new Point(current.x + d.x, current.y + d.y);
@@ -57,13 +69,12 @@ public class DfsSolver {
                 }
             }
         }
-        return path; // No path found
+        long endTime = System.currentTimeMillis();
+        return new Result(allPaths, path, endTime - startTime, path.size()); // Returns all paths and the shortest path
     }
 
     public SolverResult solve(int[][] maze, Point start, Point end) {
         Maze mazeInstance = new Maze(maze, start, end);
-        List<Point> path = solve(mazeInstance);
-        return new Result(path, 0, path.size()); // Time is set to 0 for simplicity
+        return solve(mazeInstance);
     }
 }
-

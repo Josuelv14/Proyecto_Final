@@ -39,7 +39,7 @@ public class MazeView extends JFrame {
         this.path = new ArrayList<>();
         this.currentPath = new ArrayList<>();
         setTitle("Maze Solver");
-        setSize(mazeMatrix[0].length * CELL_SIZE + 300, mazeMatrix.length * CELL_SIZE + 200);
+        setSize(mazeMatrix[0].length * CELL_SIZE + 400, mazeMatrix.length * CELL_SIZE + 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         initComponents();
@@ -70,47 +70,57 @@ public class MazeView extends JFrame {
 
         // Panel de controles
         JPanel controlPanel = new JPanel();
-        algorithmComboBox = new JComboBox<>(new String[]{"BFS", "DFS", "Recursive", "DP"});
-        solveButton = new JButton("Solve");
-        solveButton.addActionListener(new SolveButtonListener());
-        clearButton = new JButton("Clear");
-        clearButton.addActionListener(new ClearButtonListener());
-        
-        // Campos para configuración dinámica
+        controlPanel.setLayout(new BorderLayout(10, 10));
+
+        // Panel para los campos de texto, etiquetas y botones
+        JPanel fieldsAndButtonsPanel = new JPanel();
+        fieldsAndButtonsPanel.setLayout(new GridLayout(13, 1, 10, 10)); // 13 filas, 1 columna, 10px de espacio entre componentes
+
         rowsField = new JTextField("5", 5);
         colsField = new JTextField("5", 5);
         startXField = new JTextField("0", 5);
         startYField = new JTextField("0", 5);
         endXField = new JTextField("4", 5);
         endYField = new JTextField("4", 5);
+
+        fieldsAndButtonsPanel.add(new JLabel("Rows:"));
+        fieldsAndButtonsPanel.add(rowsField);
+        fieldsAndButtonsPanel.add(new JLabel("Cols:"));
+        fieldsAndButtonsPanel.add(colsField);
+        fieldsAndButtonsPanel.add(new JLabel("Start X:"));
+        fieldsAndButtonsPanel.add(startXField);
+        fieldsAndButtonsPanel.add(new JLabel("Start Y:"));
+        fieldsAndButtonsPanel.add(startYField);
+        fieldsAndButtonsPanel.add(new JLabel("End X:"));
+        fieldsAndButtonsPanel.add(endXField);
+        fieldsAndButtonsPanel.add(new JLabel("End Y:"));
+        fieldsAndButtonsPanel.add(endYField);
+
         updateMazeButton = new JButton("Update Maze");
         updateMazeButton.addActionListener(new UpdateMazeButtonListener());
+        fieldsAndButtonsPanel.add(updateMazeButton);
+
+        algorithmComboBox = new JComboBox<>(new String[]{"BFS", "DFS", "Recursive", "DP"});
+        fieldsAndButtonsPanel.add(new JLabel("Select Algorithm:"));
+        fieldsAndButtonsPanel.add(algorithmComboBox);
+
+        solveButton = new JButton("Solve");
+        solveButton.addActionListener(new SolveButtonListener());
+        fieldsAndButtonsPanel.add(solveButton);
+
+        clearButton = new JButton("Clear");
+        clearButton.addActionListener(new ClearButtonListener());
+        fieldsAndButtonsPanel.add(clearButton);
 
         resultLabel = new JLabel("Results will be shown here");
+        fieldsAndButtonsPanel.add(resultLabel);
 
-        controlPanel.add(new JLabel("Rows:"));
-        controlPanel.add(rowsField);
-        controlPanel.add(new JLabel("Cols:"));
-        controlPanel.add(colsField);
-        controlPanel.add(new JLabel("Start Y:"));
-        controlPanel.add(startXField);
-        controlPanel.add(new JLabel("Start X:"));
-        controlPanel.add(startYField);
-        controlPanel.add(new JLabel("End X:"));
-        controlPanel.add(endXField);
-        controlPanel.add(new JLabel("End Y:"));
-        controlPanel.add(endYField);
-        controlPanel.add(updateMazeButton);
-        controlPanel.add(new JLabel("Select Algorithm:"));
-        controlPanel.add(algorithmComboBox);
-        controlPanel.add(solveButton);
-        controlPanel.add(clearButton);
-        controlPanel.add(resultLabel);
+        controlPanel.add(fieldsAndButtonsPanel, BorderLayout.EAST);
 
         // Añadir paneles al frame
         setLayout(new BorderLayout());
         add(mazePanel, BorderLayout.CENTER);
-        add(controlPanel, BorderLayout.SOUTH);
+        add(controlPanel, BorderLayout.EAST);
     }
 
     private void drawMaze(Graphics g) {
@@ -162,7 +172,7 @@ public class MazeView extends JFrame {
             if (result != null) {
                 path = result.getPath();
                 showPathStepByStep();
-                resultLabel.setText(String.format("Time: %d ms, Steps: %d", result.getTime(), result.getSteps()));
+                resultLabel.setText(String.format("Time: %.2f seconds, Steps: %d", result.getTime() / 1000.0, result.getSteps()));
             } else {
                 resultLabel.setText("No path found.");
             }
@@ -244,4 +254,3 @@ public class MazeView extends JFrame {
         });
     }
 }
-
